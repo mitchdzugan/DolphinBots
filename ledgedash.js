@@ -100,47 +100,20 @@ client.on('close', function() {
 	console.log('Connection closed');
 });
 
+
 /*****
  * END LIBRARY STUFF
  */
 
-
-function ledgedashActions(frameStart, controller) {
-
-	function action(relativeFrame, controls) {
-		controls.frame = frameStart + relativeFrame;
-		controls.controller = controller
-		return controls
-	}
-
-	return [
-		action(1, { substickX: 255 }),
-		action(2, { stickY: 255 }),
-		action(3, { stickY: 255, button: b }),
-		action(38, { stickX: 255 }),
-		action(39, { stickX: 0, button: y }),
-		action(40, { stickX: 0 }),
-		action(41, { stickX: 0 }),
-		action(42, { stickX: 0 }),
-		action(43, { stickX: 0, stickY: 80, button: r }),
-		action(55, { triggerLeft: 255 })
-	]
-}
+var sheik = require('./sheik.js');
 
 function onFrame(c1, c2, c3, c4, c1prev, c2prev, c3prev, c4prev) {
 	// check is dpaddown was just pressed on controller 1
 	if (c1 != null && (c1.button & dpadDown) != 0 && (c1prev.button & dpadDown) == 0) {
-		// have the inputs start a few frames after the one where dpad was pushed
-		// this gives both this script and dolphin time to process.
-		// if you are getting dropped inputs, try increasing this number.
-		waitFrames = 10
-		screenshotActions = []
-		/** 
-		// uncomment this and you can get a screnshot of every frame of the ledge dash
-		for (i = c1.frame + waitFrames; i < c1.frame + waitFrames + 60; i++) {
-			screenshotActions.push({frame: i, filename: "" + (i - waitFrames - curr.frame)})
-		}
-		*/
-		writeActions(client, {PadManipActions: ledgedashActions(c1.frame + waitFrames, 0), TakeScreenshotActions: screenshotActions})
+		sheik.actions(writeActions, client, c1.frame);
+	}
+	if (c1 != null && (c1.button & dpadLeft) != 0 && (c1prev.button & dpadLeft) == 0) {
+		delete require.cache[require.resolve('./sheik.js')]
+		sheik = require('./sheik.js');
 	}
 }
